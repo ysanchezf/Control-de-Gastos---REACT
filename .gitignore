@@ -1,0 +1,13 @@
+node_modules/
+dist/
+bin/
+obj/
+.vs/
+App_Data/
+server/wwwroot/
+*.user
+*.db
+*.db-*
+.env.local
+tests/artifacts/
+__pycache__/
