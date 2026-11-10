@@ -23,7 +23,7 @@ export default function SavingsSimulator() {
         />
       </label>
       <button
-        className="secondary"
+        className="button quiet"
         aria-pressed={weekly}
         onClick={() => setWeekly(!weekly)}
       >

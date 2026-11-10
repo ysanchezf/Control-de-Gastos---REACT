@@ -4,7 +4,7 @@ import SavingsSimulator from "../components/SavingsSimulator";
 import Feedback from "../components/Feedback";
 export default function Home({ workspace }) {
   return (
-    <>
+    <div className="welcome-page">
       <section className="hero">
         <div>
           <p className="eyebrow">MENOS CUENTAS PENDIENTES. MÁS TRANQUILIDAD.</p>
@@ -14,7 +14,7 @@ export default function Home({ workspace }) {
             decidir con más claridad.
           </p>
           <div className="actions">
-            <Link className="button" to="/gastos">
+            <Link className="button dark" to="/gastos">
               Organizar mis gastos ↗
             </Link>
             <Link to="/categorias">Ver categorías</Link>
@@ -31,6 +31,7 @@ export default function Home({ workspace }) {
       <Feedback {...workspace} onRetry={workspace.reload} />
       {!workspace.loading && !workspace.error && (
         <Summary
+          allowVisibility
           total={workspace.total}
           count={workspace.gastos.length}
           categories={workspace.categorias.length}
@@ -57,6 +58,6 @@ export default function Home({ workspace }) {
         </section>
         <SavingsSimulator />
       </div>
-    </>
+    </div>
   );
 }

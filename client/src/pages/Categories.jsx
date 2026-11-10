@@ -54,19 +54,26 @@ export default function Categories({ workspace: w }) {
   return (
     <>
       <div className="page-heading">
-        <p className="eyebrow">ORDEN A TU MANERA</p>
+        <span className="eyebrow">MI ORGANIZACIÓN</span>
         <h1>Categorías</h1>
-        <p>Alimentación, transporte, un gusto… tú eliges cómo organizarte.</p>
+        <p>
+          Crea grupos para tus gastos: comida, transporte, casa o lo que
+          necesites.
+        </p>
       </div>
       <Feedback {...w} onRetry={w.reload} />
       {error && (
-        <p className="error" role="alert">
+        <p className="notice error" role="alert">
           {error}
         </p>
       )}
-      <p role="status">{message}</p>
+      {message && (
+        <p className="notice success" role="status">
+          {message}
+        </p>
+      )}
       {!w.loading && !w.error && (
-        <div className="two-column category-layout">
+        <>
           <div id="category-editor">
             <CategoryForm
               key={version}
@@ -76,6 +83,13 @@ export default function Categories({ workspace: w }) {
               onCancel={reset}
             />
           </div>
+          <div className="section-heading">
+            <div>
+              <h2>Tus categorías</h2>
+              <p>Puedes cambiar el nombre y la descripción cuando quieras.</p>
+            </div>
+            <span className="pill">{w.categorias.length} categorías</span>
+          </div>
           <CategoryList
             categories={w.categorias}
             expenses={w.gastos}
@@ -83,7 +97,7 @@ export default function Categories({ workspace: w }) {
             onEdit={edit}
             onDelete={remove}
           />
-        </div>
+        </>
       )}
     </>
   );

@@ -1,6 +1,6 @@
 # Bolsillo · Tercer artefacto React
 
-Aplicación de control de gastos con **React 19, JSX, Vite y ASP.NET Core .NET 10**, con SQLite. Tres páginas: Inicio, Gastos y Categorías. Permite crear, editar, consultar y eliminar gastos y categorías.
+Aplicación de control de gastos con **React 19, JSX, Vite y ASP.NET Core .NET 10**, con SQLite. Pantallas de Resumen, Gastos y Categorías con el diseño del segundo artefacto Blazor. Landing adicional en `/bienvenida` (enlace Inicio). Permite crear, editar, consultar y eliminar gastos y categorías.
 
 ## Ejecutar en Windows / Visual Studio
 
@@ -61,7 +61,7 @@ Se creó un `Program.cs` específico para React y se reemplazó la interfaz Blaz
 
 | Requisito | Implementación |
 |---|---|
-| Landing page | `pages/Home.jsx`: presentación, llamadas a la acción e ilustración |
+| Landing page | `/bienvenida`, `pages/Home.jsx`: presentación, llamadas a la acción e ilustración |
 | Dos páginas adicionales | `pages/Expenses.jsx` y `pages/Categories.jsx` |
 | Dos componentes por página | Inicio: `Summary` y `SavingsSimulator`; Gastos: `ExpenseForm` y `ExpenseTable`; Categorías: `CategoryForm` y `CategoryList` |
 | JSX | Archivos `.jsx` de páginas y componentes |
@@ -76,7 +76,7 @@ Se creó un `Program.cs` específico para React y se reemplazó la interfaz Blaz
 | Cambio de visibilidad | Ocultar/mostrar importe en `Summary` |
 | Información desde API | Resumen, tabla de gastos y categorías; carga con `useEffect` |
 
-Los tres componentes de interacción son visibles en Inicio cuando la API está disponible. El simulador no escribe en la base: calcula un ahorro estimado, sin intereses, usando cuatro semanas por mes.
+Los tres componentes de interacción son visibles en Inicio (`/bienvenida`) cuando la API está disponible. El simulador no escribe en la base: calcula un ahorro estimado, sin intereses, usando cuatro semanas por mes.
 
 ## Flujo y archivos importantes
 
@@ -126,4 +126,10 @@ Entregar el archivo `ENTREGA.txt` con la URL del repositorio y realizar la expos
 - Prueba integrada aprobada tanto con el bundle servido por ASP.NET Core como mediante Vite y su proxy.
 - CRUD real de gastos y categorías, total actualizado, duplicados y eliminación de categoría en uso rechazados.
 - Escritura sin token antifalsificación rechazada; contador, frecuencia y visibilidad comprobados.
-- Tres páginas revisadas a 1440 y 390 píxeles, con imágenes cargadas y sin errores JavaScript.
+- Pantallas revisadas a 1440 y 390 píxeles, con imágenes cargadas y sin errores JavaScript.
+
+## Diseño del segundo artefacto
+
+Las rutas `/`, `/gastos` y `/categorias` reproducen la estructura, textos y estilos de Blazor: barra lateral, encabezado con fecha, pie, tarjetas de resumen, tabla y distribución por categoría; formularios en dos columnas y tarjetas de categorías. El CSS base se reutilizó de `wwwroot/app.css` del repositorio original. El pie identifica correctamente la entrega React.
+
+La landing con imágenes, contador, cambio de frecuencia y visibilidad se conserva en `/bienvenida`, accesible mediante **Inicio**. Así las pantallas de trabajo mantienen el diseño original y se conservan los requisitos del tercer artefacto. `Dashboard.jsx` compone `Summary`, `ExpenseTable` y el nuevo `SpendingBreakdown`.

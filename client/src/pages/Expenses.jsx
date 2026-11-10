@@ -1,4 +1,6 @@
 import { useState } from "react";
+import Summary from "../components/Summary";
+import Card from "../components/Card";
 import ExpenseForm from "../components/ExpenseForm";
 import ExpenseTable from "../components/ExpenseTable";
 import Feedback from "../components/Feedback";
@@ -52,22 +54,36 @@ export default function Expenses({ workspace: w }) {
       .getElementById("expense-editor")
       .scrollIntoView({ behavior: "smooth" });
   }
+  const filtered = w.gastos
+    .filter((g) =>
+      g.descripcion.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
+    )
+    .sort((a, b) => b.fecha.localeCompare(a.fecha) || b.id - a.id);
   return (
     <>
       <div className="page-heading">
-        <p className="eyebrow">PASO A PASO</p>
+        <span className="eyebrow">MIS MOVIMIENTOS</span>
         <h1>Gastos</h1>
-        <p>Lo que anotas hoy te ayuda a decidir mañana.</p>
+        <p>Lleva el registro de lo que pagas y corrige lo que necesites.</p>
       </div>
       <Feedback {...w} onRetry={w.reload} />
       {error && (
-        <p className="error" role="alert">
+        <p className="notice error" role="alert">
           {error}
         </p>
       )}
-      <p role="status">{message}</p>
+      {message && (
+        <p className="notice success" role="status">
+          {message}
+        </p>
+      )}
       {!w.loading && !w.error && (
         <>
+          <Summary
+            total={w.total}
+            count={w.gastos.length}
+            categories={w.categorias.length}
+          />
           <div id="expense-editor">
             <ExpenseForm
               key={version}
@@ -78,25 +94,30 @@ export default function Expenses({ workspace: w }) {
               onCancel={reset}
             />
           </div>
-          <label className="search">
-            Buscar por descripción
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+          <Card
+            title="Todos tus movimientos"
+            description={`${filtered.length} resultados`}
+            actions={
+              <label className="search">
+                <span className="sr-only">Buscar gastos</span>
+                <input
+                  aria-label="Buscar gastos"
+                  placeholder="Buscar un gasto…"
+                  type="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </label>
+            }
+          >
+            <ExpenseTable
+              expenses={filtered}
+              categories={w.categorias}
+              busy={busy}
+              onEdit={edit}
+              onDelete={remove}
             />
-          </label>
-          <ExpenseTable
-            expenses={w.gastos.filter((g) =>
-              g.descripcion
-                .toLocaleLowerCase()
-                .includes(search.toLocaleLowerCase()),
-            )}
-            categories={w.categorias}
-            busy={busy}
-            onEdit={edit}
-            onDelete={remove}
-          />
+          </Card>
         </>
       )}
     </>

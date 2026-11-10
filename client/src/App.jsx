@@ -1,4 +1,5 @@
 import { Link, Route, Routes } from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Expenses from "./pages/Expenses";
@@ -9,7 +10,8 @@ export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Home workspace={workspace} />} />
+        <Route index element={<Dashboard workspace={workspace} />} />
+        <Route path="bienvenida" element={<Home workspace={workspace} />} />
         <Route path="gastos" element={<Expenses workspace={workspace} />} />
         <Route
           path="categorias"

@@ -1,9 +1,13 @@
 export default function Feedback({ loading, error, onRetry }) {
   return (
     <>
-      {loading && <p role="status">Consultando tus datos…</p>}
+      {loading && (
+        <p className="notice" role="status">
+          Consultando tus finanzas…
+        </p>
+      )}
       {error && (
-        <div role="alert" className="error">
+        <div role="alert" className="notice error">
           {error}{" "}
           <button type="button" onClick={onRetry}>
             Reintentar

@@ -6,7 +6,11 @@ export default function CategoryForm({ editing, busy, onSave, onCancel }) {
     descripcion: editing?.descripcion || "",
   });
   return (
-    <Card title={editing ? "Editar categoría" : "Una categoría nueva"}>
+    <Card
+      className="form-panel"
+      eyebrow="DETALLES DE LA CATEGORÍA"
+      title={editing ? "Editar categoría" : "Nueva categoría"}
+    >
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -14,45 +18,50 @@ export default function CategoryForm({ editing, busy, onSave, onCancel }) {
         }}
       >
         <fieldset disabled={busy}>
-          <label>
-            Nombre
-            <input
-              required
-              minLength="2"
-              maxLength="80"
-              value={form.nombre}
-              onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-            />
-          </label>
-          <label>
-            Descripción
-            <textarea
-              required
-              maxLength="250"
-              value={form.descripcion}
-              onChange={(e) =>
-                setForm({ ...form, descripcion: e.target.value })
-              }
-            />
-          </label>
-          <button>
-            {busy
-              ? "Guardando…"
-              : editing
-                ? "Guardar cambios"
-                : "Crear categoría"}
-          </button>
+          <div className="form-grid">
+            <label>
+              Nombre
+              <input
+                placeholder="Ej. Alimentación"
+                required
+                minLength="2"
+                maxLength="80"
+                value={form.nombre}
+                onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+              />
+            </label>
+            <label>
+              Descripción
+              <input
+                placeholder="¿Qué gastos agrupa?"
+                required
+                maxLength="250"
+                value={form.descripcion}
+                onChange={(e) =>
+                  setForm({ ...form, descripcion: e.target.value })
+                }
+              />
+            </label>
+          </div>
+          <div className="form-actions">
+            <span className="muted">
+              Elige un nombre que reconozcas fácilmente.
+            </span>
+            {editing && (
+              <button className="button quiet" type="button" onClick={onCancel}>
+                Cancelar edición
+              </button>
+            )}
+            <button className="button dark">
+              {busy
+                ? "Guardando…"
+                : editing
+                  ? "Guardar cambios"
+                  : "Crear categoría"}{" "}
+              <span aria-hidden="true">＋</span>
+            </button>
+          </div>
         </fieldset>
-        {editing && (
-          <button
-            type="button"
-            className="text-button"
-            disabled={busy}
-            onClick={onCancel}
-          >
-            Cancelar edición
-          </button>
-        )}
       </form>
     </Card>
   );

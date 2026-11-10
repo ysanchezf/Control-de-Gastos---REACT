@@ -37,9 +37,9 @@ with tempfile.TemporaryDirectory(prefix='bolsillo-react-') as directory:
             page = browser.new_page(viewport={'width': 1440, 'height': 1050})
             errors = []
             page.on('pageerror', lambda error: errors.append(str(error)))
-            page.goto(UI+'/')
+            page.goto(UI+'/bienvenida')
             expect(page.get_by_role('heading', name='Haz espacio para lo que de verdad importa.')).to_be_visible()
-            expect(page.get_by_role('heading', name='Tu panorama')).to_be_visible()
+            expect(page.get_by_role('region', name='Resumen de gastos')).to_be_visible()
             expect(page.locator('.counter output')).to_have_text('3')
             page.get_by_role('button', name='Aumentar meses').click()
             expect(page.locator('.counter output')).to_have_text('4')
@@ -61,7 +61,7 @@ with tempfile.TemporaryDirectory(prefix='bolsillo-react-') as directory:
             page.get_by_label('Descripción', exact=True).fill('Compra semanal')
             page.get_by_label('Monto (RD$)').fill('1250')
             page.get_by_label('Categoría', exact=True).select_option(label='Alimentación')
-            page.get_by_role('button', name='Agregar gasto').click()
+            page.get_by_role('button', name='Guardar gasto').click()
             expect(page.get_by_role('cell', name='Compra semanal', exact=True)).to_be_visible()
             page.get_by_role('button', name='Editar Compra semanal').click()
             page.get_by_label('Monto (RD$)').fill('1300')
@@ -84,20 +84,20 @@ with tempfile.TemporaryDirectory(prefix='bolsillo-react-') as directory:
             shots.mkdir(exist_ok=True)
             for width in [1440, 390]:
                 page.set_viewport_size({'width':width,'height':1000})
-                for route in ['/', '/gastos', '/categorias']:
+                for route in ['/', '/gastos', '/categorias', '/bienvenida']:
                     page.goto(UI+route)
-                    expect(page.locator('h1')).to_be_visible()
-                    expect(page.get_by_role('heading',name='Tu panorama') if route=='/' else page.get_by_role('heading',name='Tus movimientos' if route=='/gastos' else 'Cada cosa en su lugar')).to_be_visible()
+                    expect(page.locator('h1')).to_be_attached()
+                    expect(page.get_by_role('region',name='Resumen de gastos') if route in ['/', '/bienvenida'] else page.get_by_role('heading',name='Todos tus movimientos' if route=='/gastos' else 'Tus categorías',exact=True)).to_be_visible()
                     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, route)
                     assert page.locator('header').count() == 1 and page.locator('footer').count() == 1
                     assert page.locator('img').evaluate_all('(images) => images.every(i => i.complete && i.naturalWidth > 0)')
                     page.screenshot(path=str(shots/f'{route.strip("/") or "inicio"}-{width}.png'), full_page=True)
             page.goto(UI+'/gastos')
             page.get_by_role('button', name='Eliminar Compra semanal').click()
-            expect(page.get_by_text('Aquí aparecerán tus gastos. Empieza con el primero.')).to_be_visible()
+            expect(page.get_by_text('Todavía no hay gastos aquí')).to_be_visible()
             page.goto(UI+'/categorias')
             page.get_by_role('button', name='Eliminar Hogar').click()
-            expect(page.get_by_text('Todavía no hay categorías. Crea la primera para comenzar.')).to_be_visible()
+            expect(page.get_by_text('Aún no tienes categorías. Crea la primera para empezar.')).to_be_visible()
             assert not errors, errors
             browser.close()
         print('OK: CRUD real, total, duplicados, categoría en uso, antiforgery, contador, estado, visibilidad, rutas directas, imágenes y móvil; sin errores JavaScript.')
