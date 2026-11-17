@@ -1,8 +1,8 @@
-import Summary from "../components/Summary";
-import Card from "../components/Card";
-import ExpenseTable from "../components/ExpenseTable";
-import SpendingBreakdown from "../components/SpendingBreakdown";
-import Feedback from "../components/Feedback";
+import Summary from "../Shared/Summary";
+import Card from "../Shared/Card";
+import ExpenseTable from "../Shared/ExpenseTable";
+import SpendingBreakdown from "../Shared/SpendingBreakdown";
+import Feedback from "../Shared/Feedback";
 export default function Dashboard({ workspace: w }) {
   const recent = [...w.gastos]
     .sort((a, b) => b.fecha.localeCompare(a.fecha) || b.id - a.id)

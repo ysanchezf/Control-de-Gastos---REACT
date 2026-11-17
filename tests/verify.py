@@ -21,16 +21,16 @@ def wait(url, process):
 with tempfile.TemporaryDirectory(prefix='bolsillo-react-') as directory:
     temp = pathlib.Path(directory)
     # La raíz temporal aísla también las claves DataProtection.
-    shutil.copy(ROOT/'server/appsettings.json', temp/'appsettings.json')
-    shutil.copytree(ROOT/'client/dist', temp/'wwwroot')
+    shutil.copy(ROOT/'appsettings.json', temp/'appsettings.json')
+    shutil.copytree(ROOT/'wwwroot', temp/'wwwroot')
     env = os.environ | {'ASPNETCORE_ENVIRONMENT': 'Development', 'ConnectionStrings__DemoConnection': f'Data Source={temp / "test.db"}'}
     log = open(temp/'server.log', 'w+')
-    process = subprocess.Popen(['dotnet', str(ROOT/'server/bin/Debug/net10.0/ControlGastos.Api.dll'), '--urls', 'http://127.0.0.1:5080', '--contentRoot', str(temp)], cwd=temp, env=env, stdout=log, stderr=log)
+    process = subprocess.Popen(['dotnet', str(ROOT/'bin/Debug/net10.0/ControlGastos.Api.dll'), '--urls', 'http://127.0.0.1:5080', '--contentRoot', str(temp)], cwd=temp, env=env, stdout=log, stderr=log)
     vite = None
     try:
         wait('http://127.0.0.1:5080/api/Gastos', process)
         if DEV:
-            vite = subprocess.Popen(['node', str(ROOT/'client/node_modules/vite/bin/vite.js'), '--host', '127.0.0.1'], cwd=ROOT/'client', stdout=log, stderr=log)
+            vite = subprocess.Popen(['node', str(ROOT/'node_modules/vite/bin/vite.js'), '--host', '127.0.0.1'], cwd=ROOT, stdout=log, stderr=log)
             wait(UI, vite)
         with sync_playwright() as p:
             browser = p.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH', '/usr/bin/chromium'), headless=True, args=['--no-sandbox'])
@@ -49,6 +49,7 @@ with tempfile.TemporaryDirectory(prefix='bolsillo-react-') as directory:
             expect(page.get_by_text('••••••')).to_be_visible()
             page.get_by_role('button', name='Mostrar importe').click()
             page.get_by_role('navigation').get_by_role('link', name='Categorías').click()
+            expect(page.get_by_role('heading', name='Categorías', exact=True)).to_be_visible()
             page.get_by_label('Nombre', exact=True).fill('Alimentación')
             page.get_by_label('Descripción', exact=True).fill('Compras del hogar')
             page.get_by_role('button', name='Crear categoría').click()
@@ -58,6 +59,7 @@ with tempfile.TemporaryDirectory(prefix='bolsillo-react-') as directory:
             page.get_by_role('button', name='Crear categoría').click()
             expect(page.get_by_role('alert')).to_contain_text('Ya tienes una categoría')
             page.get_by_role('navigation').get_by_role('link', name='Gastos', exact=True).click()
+            expect(page.get_by_role('heading', name='Gastos', exact=True)).to_be_visible()
             page.get_by_label('Descripción', exact=True).fill('Compra semanal')
             page.get_by_label('Monto (RD$)').fill('1250')
             page.get_by_label('Categoría', exact=True).select_option(label='Alimentación')
@@ -69,8 +71,16 @@ with tempfile.TemporaryDirectory(prefix='bolsillo-react-') as directory:
             expect(page.get_by_text('Gasto guardado.', exact=True)).to_be_visible()
             total = page.request.get('http://127.0.0.1:5080/api/Gastos/total').json()['totalGastos']
             assert total == 1300, total
+            # Los datos y las claves deben sobrevivir al reinicio del proceso.
+            process.terminate()
+            process.wait(timeout=10)
+            process = subprocess.Popen(['dotnet', str(ROOT/'bin/Debug/net10.0/ControlGastos.Api.dll'), '--urls', 'http://127.0.0.1:5080', '--contentRoot', str(temp)], cwd=temp, env=env, stdout=log, stderr=log)
+            wait('http://127.0.0.1:5080/api/Gastos', process)
+            assert page.request.get('http://127.0.0.1:5080/api/Gastos/total').json()['totalGastos'] == 1300
+            assert page.request.get('http://127.0.0.1:5080/api/Categorias').json()[0]['nombre'] == 'Alimentación'
             page.on('dialog', lambda dialog: dialog.accept())
             page.get_by_role('navigation').get_by_role('link', name='Categorías').click()
+            expect(page.get_by_role('heading', name='Categorías', exact=True)).to_be_visible()
             page.get_by_role('button', name='Eliminar Alimentación').click()
             expect(page.get_by_role('alert')).to_contain_text('Esta categoría tiene gastos')
             page.get_by_role('button', name='Editar Alimentación').click()

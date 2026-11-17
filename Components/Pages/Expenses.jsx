@@ -1,10 +1,10 @@
 import { useState } from "react";
-import Summary from "../components/Summary";
-import Card from "../components/Card";
-import ExpenseForm from "../components/ExpenseForm";
-import ExpenseTable from "../components/ExpenseTable";
-import Feedback from "../components/Feedback";
-import { api } from "../services/api";
+import Summary from "../Shared/Summary";
+import Card from "../Shared/Card";
+import ExpenseForm from "../Shared/ExpenseForm";
+import ExpenseTable from "../Shared/ExpenseTable";
+import Feedback from "../Shared/Feedback";
+import { api } from "../../Services/api";
 export default function Expenses({ workspace: w }) {
   const [editing, setEditing] = useState(null),
     [version, setVersion] = useState(0),

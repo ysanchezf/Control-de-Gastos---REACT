@@ -34,7 +34,6 @@ using (var scope = app.Services.CreateScope()) {
 }
 app.UseSwagger();
 app.UseSwaggerUI();
-app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -44,5 +43,5 @@ app.MapGet("/cuenta/antiforgery", (HttpContext context, IAntiforgery antiforgery
     return Results.Ok(new { token = antiforgery.GetAndStoreTokens(context).RequestToken });
 }).RequireAuthorization();
 app.MapControllers();
-app.MapFallbackToFile("index.html");
+app.MapFallbackToFile("build/index.html");
 app.Run();

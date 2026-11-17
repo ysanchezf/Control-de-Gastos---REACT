@@ -6,41 +6,74 @@ Aplicación de control de gastos con **React 19, JSX, Vite y ASP.NET Core .NET 1
 
 Requisitos: Visual Studio con la carga **Desarrollo de ASP.NET y web**, SDK **.NET 10** y **Node.js 22.12 o superior** (también Node 24). npm se instala con Node. Comprueba `dotnet --version`, `node --version` y `npm --version`.
 
-1. Clona este repositorio y abre `ControlGastos.React.sln` en Visual Studio.
-2. Selecciona `ControlGastos.Api` como proyecto de inicio y el perfil **http**. Ejecuta con F5. API: `http://localhost:5080/swagger`.
-3. Abre **Ver → Terminal**, desde la raíz del repositorio:
+1. Clona el repositorio y abre `ControlGastos.React.sln` en Visual Studio.
+2. Desde la raíz, prepara la interfaz:
 
 ```powershell
-cd client
 npm ci
-npm run dev
+npm run build
 ```
 
-4. Abre **http://127.0.0.1:5173**. Mantén ejecutándose ambos procesos. Para detenerlos: Shift+F5 en Visual Studio y Ctrl+C en la terminal.
+3. Selecciona `ControlGastos.Api` como proyecto de inicio, perfil **http**, y ejecuta con F5.
+4. Abre **http://localhost:5080**. Swagger está en **http://localhost:5080/swagger**.
 
-La solución incluye el backend; el frontend está en la carpeta `client` y se ejecuta con npm desde la terminal de Visual Studio. No necesitas crear otro proyecto ni instalar SQL Server.
+La interfaz compilada y la API se sirven en un solo proceso. Después de modificar JSX o CSS, vuelve a ejecutar `npm run build` y reinicia la aplicación.
 
-### Alternativa desde dos terminales
+### Alternativa desde la terminal
 
-Terminal 1, desde la raíz:
-
-```powershell
-dotnet run --project server/ControlGastos.Api.csproj --launch-profile http
-```
-
-Terminal 2:
+Desde la raíz del repositorio:
 
 ```powershell
-cd client
 npm ci
-npm run dev
+npm run build
+dotnet run --project ControlGastos.Api.csproj --launch-profile http
 ```
 
-Vite reenvía `/api` y `/cuenta` al puerto **5080**. Si cambias ese puerto, modifica también `client/vite.config.js`. El puerto 7017 del proyecto Blazor anterior no se utiliza aquí. No necesitas ejecutar el repositorio anterior junto con este.
+### Desarrollo con recarga automática (opcional)
+
+Ejecuta `dotnet run --project ControlGastos.Api.csproj --launch-profile http` en una terminal y `npm run dev` en otra, ambas desde la raíz. Abre **http://127.0.0.1:5173**. Vite reenvía `/api`, `/cuenta` y `/images` al puerto **5080**. Si cambias ese puerto, modifica también `vite.config.js`. Detén los procesos con Ctrl+C (o Shift+F5 en Visual Studio).
+
+## Estructura compartida con LP2
+
+No hay carpetas `client` ni `server`. La solución y ambas herramientas trabajan desde la raíz:
+
+```text
+Components/
+  App.jsx                  # Rutas React
+  main.jsx                 # Punto de entrada
+  Pages/                   # Resumen, Gastos, Categorías e Inicio
+  Layout/                  # Navegación, encabezado y pie
+  Shared/                  # Formularios, tablas, tarjetas y simulador
+  Hooks/                   # Estado compartido del espacio local
+Controllers/               # API REST
+Data/                      # DbContext
+Models/
+Migrations/
+Services/                  # Servicios C# y cliente HTTP api.js
+Properties/
+wwwroot/
+  app.css
+  images/
+  build/                   # Bundle generado, ignorado en Git
+Program.cs
+ControlGastos.Api.csproj
+ControlGastos.React.sln
+appsettings.json
+index.html
+package.json
+vite.config.js
+tests/
+```
+
+Se sigue la organización de LP2 conservando componentes JSX en lugar de Razor. Vite genera únicamente `wwwroot/build`; no borra CSS, imágenes ni datos. ASP.NET Core sirve las imágenes y el bundle, y resuelve las rutas React con `build/index.html`.
 
 ## Datos y alcance
 
-La base `server/App_Data/react-demo.db` se crea automáticamente con las migraciones existentes. Empieza vacía: crea una categoría y después un gasto. Los datos persisten entre reinicios. Las claves de protección se generan en `server/App_Data/keys`. Ninguno de estos archivos se sube a GitHub.
+La base `App_Data/react-demo.db` se crea automáticamente con las migraciones existentes. Empieza vacía: crea una categoría y después un gasto. Los datos persisten entre reinicios. Las claves de protección se generan en `App_Data/keys`. Ninguno de estos archivos se sube a GitHub.
+
+### Conservar datos de una instalación anterior
+
+Detén la aplicación anterior y haz una copia de seguridad de **toda** la carpeta `server/App_Data`, incluidas las claves y los posibles archivos SQLite `-wal` y `-shm`. Después de actualizar, mueve esa carpeta completa a `App_Data` en la raíz **antes del primer arranque**. No sobrescribas una carpeta `App_Data` existente: conserva ambas copias y decide cuál utilizar. La conexión sigue usando `Data Source=App_Data/react-demo.db`, las migraciones y la identidad local no cambian. Si utilizas `ConnectionStrings__DemoConnection`, conserva el valor y ajusta cualquier ruta relativa a la nueva raíz. No se incluye ni se sustituye ninguna base personal del repositorio LP2.
 
 Este artefacto conserva el **modo local de demostración sin login**, con una identidad técnica para mantener los filtros de propietario de la API. No ofrece cuentas ni aislamiento entre visitantes: es un espacio compartido de desarrollo y el servidor rechaza ejecutarse fuera de Development. No debe publicarse como una aplicación multiusuario. No se copiaron bases personales ni claves del proyecto anterior.
 
@@ -61,16 +94,16 @@ Se creó un `Program.cs` específico para React y se reemplazó la interfaz Blaz
 
 | Requisito | Implementación |
 |---|---|
-| Landing page | `/bienvenida`, `pages/Home.jsx`: presentación, llamadas a la acción e ilustración |
-| Dos páginas adicionales | `pages/Expenses.jsx` y `pages/Categories.jsx` |
+| Landing page | `/bienvenida`, `Components/Pages/Home.jsx`: presentación, llamadas a la acción e ilustración |
+| Dos páginas adicionales | `Components/Pages/Expenses.jsx` y `Components/Pages/Categories.jsx` |
 | Dos componentes por página | Inicio: `Summary` y `SavingsSimulator`; Gastos: `ExpenseForm` y `ExpenseTable`; Categorías: `CategoryForm` y `CategoryList` |
 | JSX | Archivos `.jsx` de páginas y componentes |
 | Props | Datos y callbacks desde las páginas hacia formularios y listados |
 | Children | `Card.jsx`, utilizado con contenido anidado en sus etiquetas |
-| CSS e imágenes | `src/styles.css` y `public/images/` |
-| Header y footer personalizados | `components/Layout.jsx` |
+| CSS e imágenes | `wwwroot/app.css` y `wwwroot/images/` |
+| Header y footer personalizados | `Components/Layout/Layout.jsx` |
 | Barra de navegación | `Header`, con `NavLink` y React Router |
-| Conexión a ASP.NET Core | `services/api.js`, mediante `fetch` y proxy Vite |
+| Conexión a ASP.NET Core | `Services/api.js`, mediante `fetch` y proxy Vite |
 | Contador | Meses de ahorro en `SavingsSimulator`, de 1 a 24 |
 | Cambio de estado | Frecuencia semanal/mensual del simulador (`useState`) |
 | Cambio de visibilidad | Ocultar/mostrar importe en `Summary` |
@@ -82,9 +115,9 @@ Los tres componentes de interacción son visibles en Inicio (`/bienvenida`) cuan
 
 `main.jsx` monta React y el router. `App.jsx` define rutas y comparte el estado de los datos. `useWorkspace.js` carga gastos, categorías y total con `Promise.all`; ofrece carga, error y reintento. Las páginas gestionan las acciones. Los formularios reciben callbacks y entregan los valores al padre. Tras guardar se consulta nuevamente la API.
 
-`services/api.js` centraliza HTTP. Antes de POST, PUT o DELETE solicita `/cuenta/antiforgery` y envía el token en `X-CSRF-TOKEN`, junto con las cookies del mismo origen. Muestra los mensajes de validación de ASP.NET Core. React no necesita JSInterop porque ejecuta JavaScript directamente.
+`Services/api.js` centraliza HTTP. Antes de POST, PUT o DELETE solicita `/cuenta/antiforgery` y envía el token en `X-CSRF-TOKEN`, junto con las cookies del mismo origen. Muestra los mensajes de validación de ASP.NET Core. React no necesita JSInterop porque ejecuta JavaScript directamente.
 
-`server/Program.cs` registra EF Core SQLite, controladores, autenticación de demostración, antiforgery y Swagger; aplica migraciones e inicializa la identidad técnica. No utiliza componentes Blazor.
+`Program.cs` registra EF Core SQLite, controladores, autenticación de demostración, antiforgery y Swagger; aplica migraciones e inicializa la identidad técnica. No utiliza componentes Blazor.
 
 ### Rutas API
 
@@ -99,7 +132,6 @@ Una categoría con gastos no se puede eliminar: la API responde 409. Los montos 
 
 ```powershell
 dotnet build ControlGastos.React.sln
-cd client
 npm ci
 npm run build
 npm audit
@@ -124,7 +156,7 @@ Entregar el archivo `ENTREGA.txt` con la URL del repositorio y realizar la expos
 - Backend compilado sin errores ni advertencias; frontend compilado con Vite.
 - `npm audit`: cero vulnerabilidades al verificar la entrega.
 - Prueba integrada aprobada tanto con el bundle servido por ASP.NET Core como mediante Vite y su proxy.
-- CRUD real de gastos y categorías, total actualizado, duplicados y eliminación de categoría en uso rechazados.
+- CRUD real de gastos y categorías, persistencia tras reiniciar el proceso, total actualizado, duplicados y eliminación de categoría en uso rechazados.
 - Escritura sin token antifalsificación rechazada; contador, frecuencia y visibilidad comprobados.
 - Pantallas revisadas a 1440 y 390 píxeles, con imágenes cargadas y sin errores JavaScript.
 

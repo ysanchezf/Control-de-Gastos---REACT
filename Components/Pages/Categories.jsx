@@ -1,8 +1,8 @@
 import { useState } from "react";
-import CategoryForm from "../components/CategoryForm";
-import CategoryList from "../components/CategoryList";
-import Feedback from "../components/Feedback";
-import { api } from "../services/api";
+import CategoryForm from "../Shared/CategoryForm";
+import CategoryList from "../Shared/CategoryList";
+import Feedback from "../Shared/Feedback";
+import { api } from "../../Services/api";
 export default function Categories({ workspace: w }) {
   const [editing, setEditing] = useState(null),
     [version, setVersion] = useState(0),

@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <DefaultItemExcludes>$(DefaultItemExcludes);node_modules/**;tests/**</DefaultItemExcludes>
     <RootNamespace>Control_de_Gastos</RootNamespace>
   </PropertyGroup>
 

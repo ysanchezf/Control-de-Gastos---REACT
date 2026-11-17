@@ -1,10 +1,10 @@
 import { Link, Route, Routes } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
-import Layout from "./components/Layout";
-import Home from "./pages/Home";
-import Expenses from "./pages/Expenses";
-import Categories from "./pages/Categories";
-import useWorkspace from "./hooks/useWorkspace";
+import Dashboard from "./Pages/Dashboard";
+import Layout from "./Layout/Layout";
+import Home from "./Pages/Home";
+import Expenses from "./Pages/Expenses";
+import Categories from "./Pages/Categories";
+import useWorkspace from "./Hooks/useWorkspace";
 export default function App() {
   const workspace = useWorkspace();
   return (

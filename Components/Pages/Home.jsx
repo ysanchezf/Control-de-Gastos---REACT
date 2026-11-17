@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import Summary from "../components/Summary";
-import SavingsSimulator from "../components/SavingsSimulator";
-import Feedback from "../components/Feedback";
+import Summary from "../Shared/Summary";
+import SavingsSimulator from "../Shared/SavingsSimulator";
+import Feedback from "../Shared/Feedback";
 export default function Home({ workspace }) {
   return (
     <div className="welcome-page">
