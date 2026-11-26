@@ -1,0 +1,36 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#244f43" />
+    <title>@ViewData["Title"] · @Configuration["AppSettings:NombreAplicacion"]</title>
+    <link rel="icon" href="~/images/wallet.svg" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="~/js/site.js" asp-append-version="true" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
+<div class="app-shell">
+    <aside class="sidebar">
+        <a class="brand" asp-page="/Index"><img src="~/images/wallet.svg" alt="" /> @Configuration["AppSettings:NombreAplicacion"]</a>
+        <span class="eyebrow">MIS CUENTAS</span>
+        <nav aria-label="Navegación principal">
+        @foreach (var link in new[] { ("/Index", "Inicio"), ("/Resumen", "Resumen"), ("/Gastos/Index", "Gastos"), ("/Categorias/Index", "Categorías"), ("/Reportes", "Reportes"), ("/Presupuesto", "Presupuesto") })
+        {
+            var active = string.Equals(ViewContext.RouteData.Values["page"]?.ToString(), link.Item1, StringComparison.OrdinalIgnoreCase);
+            <a asp-page="@link.Item1" class="@(active ? "active" : "")" aria-current="@(active ? "page" : null)">@link.Item2</a>
+        }
+        </nav>
+        <div class="demo-badge"><span>MODO PRUEBA</span><p>Tu espacio de demostración.</p><strong>Prueba · Razor Pages</strong></div>
+    </aside>
+    <div class="workspace">
+        <header class="topbar"><span>Control de gastos</span><time datetime="@DateTime.Today.ToString("yyyy-MM-dd")">@DateTime.Today.ToString("dddd, d 'de' MMMM")</time></header>
+        <main id="contenido" tabindex="-1">@RenderBody()</main>
+        <footer><strong>bolsillo</strong> · Evaluación final · Razor Pages <span>@DateTime.Today.Year</span></footer>
+    </div>
+</div>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

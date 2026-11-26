@@ -1,0 +1,16 @@
+@page
+@model ReportesModel
+@{ ViewData["Title"] = "Reportes"; }
+<div class="page-heading"><span class="eyebrow">EXTRA 01 · COMPRENDE TUS HÁBITOS</span><h1>Reportes</h1><p>Elige un mes, revisa la distribución y descarga tus movimientos.</p></div>
+<partial name="_Feedback" model="Model" />
+<form method="get" class="toolbar panel"><label asp-for="Mes">Mes del reporte<input asp-for="Mes" type="month" required /></label><button class="button dark">Consultar</button></form>
+<div asp-validation-summary="All" class="validation" role="alert"></div>
+@if (Model.Error is null && ViewData.ModelState.IsValid) {
+<section class="panel"><div class="section-heading"><div><span class="eyebrow">TOTAL DEL MES</span><h2>@Model.Total.ToString("C2")</h2><p>@Model.Gastos.Count movimientos</p></div><a class="button quiet" asp-page-handler="Exportar" asp-route-Mes="@Model.Mes">Descargar CSV</a></div>
+@if (!Model.Gastos.Any()) { <p class="empty">No hay gastos en el mes seleccionado.</p> }
+@foreach (var c in Model.Categorias) {
+ var total = Model.Gastos.Where(g => g.CategoriaId == c.Id).Sum(g => g.Monto);
+ if (total > 0) { <div class="list-row"><span>@c.Nombre</span><strong>@total.ToString("C2")</strong></div> }
+}
+</section>
+}

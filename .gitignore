@@ -4,10 +4,14 @@ bin/
 obj/
 .vs/
 App_Data/
-wwwroot/build/
+**/wwwroot/build/
 *.user
 *.db
 *.db-*
 .env.local
-tests/artifacts/
+**/tests/artifacts/
 __pycache__/
+
+*.log
+
+local-backups/

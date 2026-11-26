@@ -1,0 +1,16 @@
+@page "/gastos"
+@model Bolsillo.Razor.Pages.Gastos.IndexModel
+@{ ViewData["Title"] = "Gastos"; }
+<div class="page-heading"><span class="eyebrow">MIS MOVIMIENTOS</span><h1>Gastos</h1><p>Lleva el registro de lo que pagas y corrige lo que necesites.</p></div>
+<partial name="_Feedback" model="Model" />
+<div class="toolbar"><form method="get" class="search-form"><label asp-for="Buscar">Buscar gastos</label><div><input asp-for="Buscar" type="search" maxlength="150" placeholder="¿Qué movimiento buscas?" /><button class="button quiet">Buscar</button></div></form><a class="button dark" asp-page="Editar">Registrar gasto →</a></div>
+<section class="panel"><div class="section-heading"><h2>Todos tus movimientos</h2><span>@Model.Gastos.Count resultados</span></div>
+@if (!Model.Gastos.Any() && Model.Error is null) { <p class="empty">Todavía no hay gastos aquí o no coinciden con tu búsqueda.</p> }
+@if (Model.Gastos.Any()) {
+<div class="table-scroll"><table><thead><tr><th>Descripción</th><th>Fecha</th><th>Categoría</th><th>Monto</th><th>Acciones</th></tr></thead><tbody>
+@foreach (var gasto in Model.Gastos) {
+<tr><td><a asp-page="Detalle" asp-route-id="@gasto.Id">@gasto.Descripcion</a></td><td>@gasto.Fecha.ToString("dd/MM/yyyy")</td><td>@(Model.Categorias.FirstOrDefault(c => c.Id == gasto.CategoriaId)?.Nombre ?? "Sin categoría")</td><td class="amount">@gasto.Monto.ToString("C2")</td><td><div class="row-actions"><a asp-page="Editar" asp-route-id="@gasto.Id" aria-label="Editar @gasto.Descripcion">Editar</a><form method="post" asp-page-handler="Eliminar" asp-route-id="@gasto.Id" data-confirm="¿Eliminar este gasto? Esta acción no se puede deshacer."><button class="text-button danger" aria-label="Eliminar @gasto.Descripcion">Eliminar</button></form></div></td></tr>
+}
+</tbody></table></div>
+}
+</section>

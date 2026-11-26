@@ -1,0 +1,11 @@
+@page
+@model PresupuestoModel
+@{ ViewData["Title"] = "Presupuesto"; }
+<div class="page-heading"><span class="eyebrow">EXTRA 02 · PLANIFICA CON CALMA</span><h1>Presupuesto</h1><p>Compara los gastos de @DateTime.Today.ToString("MMMM yyyy") con tu límite de referencia.</p></div>
+<partial name="_Feedback" model="Model" />
+<div class="two-column"><section class="panel"><h2>Define tu referencia</h2><p>Este simulador no guarda un presupuesto ni modifica tus gastos.</p>
+<form method="post"><div asp-validation-summary="All" class="validation" role="alert"></div><label asp-for="Limite">Presupuesto mensual (RD$)<input asp-for="Limite" type="number" min="1" max="999999999" step="0.01" required /></label><button class="button dark">Calcular disponible →</button></form></section>
+@if (Model.Error is null && ViewData.ModelState.IsValid) {
+<section class="panel"><span class="eyebrow">TU MARGEN ESTE MES</span><h2>@(Model.Disponible >= 0 ? "Todavía tienes espacio." : "Es momento de ajustar.")</h2><p>Gastos del mes: <strong>@Model.Gastado.ToString("C2")</strong></p><p>Disponible: <strong id="disponible">@Model.Disponible.ToString("C2")</strong></p><progress max="100" value="@Model.Porcentaje.ToString(System.Globalization.CultureInfo.InvariantCulture)">@Model.Porcentaje.ToString("N1")%</progress><button type="button" class="button quiet" data-print>Imprimir referencia</button></section>
+}
+</div>

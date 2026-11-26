@@ -1,0 +1,12 @@
+@page "/categorias"
+@model Bolsillo.Razor.Pages.Categorias.IndexModel
+@{ ViewData["Title"] = "Categorías"; }
+<div class="page-heading"><span class="eyebrow">CADA COSA EN SU LUGAR</span><h1>Categorías</h1><p>Organiza tus movimientos con nombres que tengan sentido para ti.</p></div>
+<partial name="_Feedback" model="Model" />
+<div class="toolbar"><h2>Tus categorías</h2><a class="button dark" asp-page="Editar">Crear categoría →</a></div>
+@if (!Model.Categorias.Any() && Model.Error is null) { <p class="empty panel">Aún no tienes categorías. Crea la primera para empezar.</p> }
+<div class="category-grid">
+@foreach (var c in Model.Categorias) {
+<article class="panel category-card"><span class="category-icon" aria-hidden="true">◈</span><h3>@c.Nombre</h3><p>@c.Descripcion</p><div class="row-actions"><a asp-page="Editar" asp-route-id="@c.Id" aria-label="Editar @c.Nombre">Editar</a><form method="post" asp-page-handler="Eliminar" asp-route-id="@c.Id" data-confirm="¿Eliminar esta categoría?"><button class="text-button danger" aria-label="Eliminar @c.Nombre">Eliminar</button></form></div></article>
+}
+</div>

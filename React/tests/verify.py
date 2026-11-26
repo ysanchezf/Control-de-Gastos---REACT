@@ -21,11 +21,11 @@ def wait(url, process):
 with tempfile.TemporaryDirectory(prefix='bolsillo-react-') as directory:
     temp = pathlib.Path(directory)
     # La raíz temporal aísla también las claves DataProtection.
-    shutil.copy(ROOT/'appsettings.json', temp/'appsettings.json')
+    shutil.copy(ROOT.parent/'Backend/appsettings.json', temp/'appsettings.json')
     shutil.copytree(ROOT/'wwwroot', temp/'wwwroot')
     env = os.environ | {'ASPNETCORE_ENVIRONMENT': 'Development', 'ConnectionStrings__DemoConnection': f'Data Source={temp / "test.db"}'}
     log = open(temp/'server.log', 'w+')
-    process = subprocess.Popen(['dotnet', str(ROOT/'bin/Debug/net10.0/ControlGastos.Api.dll'), '--urls', 'http://127.0.0.1:5080', '--contentRoot', str(temp)], cwd=temp, env=env, stdout=log, stderr=log)
+    process = subprocess.Popen(['dotnet', str(ROOT.parent/'Backend/bin/Debug/net10.0/ControlGastos.Api.dll'), '--urls', 'http://127.0.0.1:5080', '--contentRoot', str(temp)], cwd=temp, env=env, stdout=log, stderr=log)
     vite = None
     try:
         wait('http://127.0.0.1:5080/api/Gastos', process)
@@ -74,7 +74,7 @@ with tempfile.TemporaryDirectory(prefix='bolsillo-react-') as directory:
             # Los datos y las claves deben sobrevivir al reinicio del proceso.
             process.terminate()
             process.wait(timeout=10)
-            process = subprocess.Popen(['dotnet', str(ROOT/'bin/Debug/net10.0/ControlGastos.Api.dll'), '--urls', 'http://127.0.0.1:5080', '--contentRoot', str(temp)], cwd=temp, env=env, stdout=log, stderr=log)
+            process = subprocess.Popen(['dotnet', str(ROOT.parent/'Backend/bin/Debug/net10.0/ControlGastos.Api.dll'), '--urls', 'http://127.0.0.1:5080', '--contentRoot', str(temp)], cwd=temp, env=env, stdout=log, stderr=log)
             wait('http://127.0.0.1:5080/api/Gastos', process)
             assert page.request.get('http://127.0.0.1:5080/api/Gastos/total').json()['totalGastos'] == 1300
             assert page.request.get('http://127.0.0.1:5080/api/Categorias').json()[0]['nombre'] == 'Alimentación'

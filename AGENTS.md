@@ -1,15 +1,16 @@
 # Preferencias del proyecto bolsillo
 
-- Antes de trabajar, revisar el estado local y el historial actual de GitHub. Conservar modificaciones locales y commits existentes; no usar force push ni reescribir el historial.
-- Los commits deben llamarse exactamente `cambio05`, `cambio06`, `cambio07`, etc. Consultar el historial y utilizar el siguiente número disponible; no reiniciar la secuencia.
-- Mantener React y JSX con la estructura equivalente a Control-de-Gastos---LP2: Components/Layout, Components/Pages, Components/Shared, Controllers, Data, Models, Migrations, Services y wwwroot, con el proyecto y la configuración en la raíz.
-- Conservar la apariencia de LP2 y las rutas /, /gastos, /categorias y /bienvenida, incluido el simulador y las interacciones académicas de contador, estado y visibilidad.
-- Mantener el modo de demostración. No reactivar el login sin una solicitud del usuario; conservar la protección antifalsificación y las validaciones de la API.
-- Conservar las bases y claves locales. No subir App_Data, bases SQLite ni sus auxiliares, claves, bin, obj o node_modules. Consultar en README cómo trasladar server/App_Data al actualizar una instalación anterior; no sobrescribir datos existentes.
-- No restaurar documentos eliminados por el usuario ni reintroducir comentarios XML <summary> sin necesidad.
-- Explicar los cambios en español sencillo, adecuado para una exposición académica.
+- Revisar el estado local y el historial de GitHub antes de trabajar. Conservar modificaciones locales y commits; no usar force push ni reescribir el historial.
+- Los commits deben llamarse exactamente `cambio05`, `cambio06`, etc. Utilizar el siguiente número disponible según el historial.
+- Estructura autorizada: `Backend/` contiene la API ASP.NET Core y la SQLite existente; `React/` conserva la interfaz del tercer artefacto; `RazorPages/` contiene la evaluación final. No volver a mezclar las fuentes de los proyectos.
+- Ambas interfaces consumen la misma API y la misma base `Backend/App_Data/react-demo.db`. No crear una base independiente para Razor ni reemplazar datos locales con ejemplos.
+- Conservar las pantallas de React, su apariencia, el simulador y las rutas /, /gastos, /categorias y /bienvenida.
+- Mantener el modo de demostración sin login. No reactivar cuentas sin solicitud del usuario. Conservar validaciones y protección antifalsificación en la web y en la API.
+- No subir bases, auxiliares SQLite, claves, App_Data, local-backups, bin, obj, node_modules ni capturas de pruebas. El traslado local debe conservar toda App_Data y detenerse ante conflictos, sin sobrescribir.
+- No restaurar documentos eliminados por el usuario. AGENTS.md y README.md fueron confirmados y deben conservarse según la solicitud actual.
+- Evitar comentarios XML <summary> innecesarios. Explicar en español sencillo los cambios y los requisitos académicos.
 
 ## Verificación
 
-Desde la raíz: `npm ci`, `npm run build` y `dotnet build ControlGastos.React.sln`.
-Para cambios de funcionamiento o estructura, ejecutar las pruebas integradas documentadas en tests/README.md con una base temporal. Python y Playwright son herramientas opcionales de pruebas; no son requisitos de ejecución de la aplicación.
+Desde la raíz: `npm ci --prefix React`, `npm run build --prefix React`, `dotnet build ControlGastos.sln`.
+Para cambios funcionales ejecutar `python RazorPages/tests/verify.py`, `python React/tests/verify.py` y, si cambia el proxy, `python React/tests/verify.py --dev`, con bases temporales y los puertos libres. Python y Playwright son herramientas opcionales de pruebas.

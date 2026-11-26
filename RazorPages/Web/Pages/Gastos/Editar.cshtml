@@ -1,0 +1,16 @@
+@page "{id:int?}"
+@model Bolsillo.Razor.Pages.Gastos.EditarModel
+@{ ViewData["Title"] = Model.Id is null ? "Registrar gasto" : "Editar gasto"; }
+<div class="page-heading"><span class="eyebrow">DETALLES DEL MOVIMIENTO</span><h1>@ViewData["Title"]</h1><p>Un registro pequeño para tener una visión más clara.</p></div>
+<partial name="_Feedback" model="Model" />
+<section class="panel editor"><form method="post">
+<div asp-validation-summary="All" class="validation" role="alert"></div>
+<div class="form-grid">
+<label asp-for="Input.Descripcion">Descripción<input asp-for="Input.Descripcion" required minlength="2" maxlength="150" placeholder="¿En qué gastaste?" /><span asp-validation-for="Input.Descripcion"></span></label>
+<label asp-for="Input.Monto">Monto (RD$)<input asp-for="Input.Monto" type="number" min="0.01" max="999999999" step="0.01" required /><span asp-validation-for="Input.Monto"></span></label>
+<label asp-for="Input.Fecha">Fecha<input asp-for="Input.Fecha" type="date" required /><span asp-validation-for="Input.Fecha"></span></label>
+<div><label asp-for="Input.CategoriaId">Categoría</label><select asp-for="Input.CategoriaId" required><option value="">Selecciona una categoría</option>@foreach (var c in Model.Categorias) { <option value="@c.Id">@c.Nombre</option> }</select><span asp-validation-for="Input.CategoriaId"></span></div>
+</div>
+@if (!Model.Categorias.Any()) { <p class="notice">Primero <a asp-page="/Categorias/Editar">crea una categoría</a> para organizar tu gasto.</p> }
+<div class="form-actions"><a class="button quiet" asp-page="Index">Cancelar</a><button class="button dark" disabled="@(!Model.Categorias.Any())">@(Model.Id is null ? "Guardar gasto" : "Guardar cambios") →</button></div>
+</form></section>

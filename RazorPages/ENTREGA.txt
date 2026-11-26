@@ -1,0 +1,5 @@
+Evaluación final - bolsillo con Razor Pages
+https://github.com/ysanchezf/Control-de-Gastos---REACT
+Proyecto Razor: RazorPages/Web
+API común y SQLite: Backend
+Instrucciones de ejecución y correspondencia con el PDF: README.md en la raíz.

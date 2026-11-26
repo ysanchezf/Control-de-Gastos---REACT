@@ -10,6 +10,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Este artefacto conserva el espacio de demostración del proyecto anterior.
 if (!builder.Environment.IsDevelopment())
     throw new InvalidOperationException("Este proyecto académico sin login solo se ejecuta en Development.");
+LocalDataMigration.Prepare(builder.Environment.ContentRootPath, builder.Configuration.GetConnectionString("DemoConnection"));
+// El backend puede servir también la versión compilada de React.
+var reactRoot = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "React", "wwwroot"));
+if (!Directory.Exists(Path.Combine(builder.Environment.ContentRootPath, "wwwroot")) && Directory.Exists(reactRoot))
+{
+    builder.Environment.WebRootPath = reactRoot;
+    builder.Environment.WebRootFileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(reactRoot);
+}
 // El filtro antiforgery MVC requiere los servicios de ViewFeatures.
 builder.Services.AddControllersWithViews(options => {
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());

@@ -1,0 +1,16 @@
+@page
+@model IndexModel
+@{ ViewData["Title"] = "Inicio"; }
+<section class="hero">
+    <div><span class="eyebrow">MENOS CUENTAS PENDIENTES. MÁS TRANQUILIDAD.</span>
+    <h1>Haz espacio para lo que de verdad importa.</h1>
+    <p>Con @Model.NombreAplicacion, cada gasto encuentra su lugar. Organiza tus movimientos y decide con más claridad.</p>
+    <div class="actions"><a class="button dark" asp-page="/Gastos/Index">Organizar mis gastos →</a><a class="button quiet" asp-page="/Resumen">Ver mi resumen</a></div>
+    <p class="muted">Espacio local de demostración · Sin registro</p></div>
+    <img src="~/images/finance-illustration.svg" alt="Billetera, tarjeta y moneda para organizar tus finanzas" />
+</section>
+<div class="feature-grid">
+    <article class="panel"><span class="eyebrow">01 · ORGANIZA</span><h2>Un lugar para cada gasto.</h2><p>Crea categorías que se parezcan a tu vida.</p><a asp-page="/Categorias/Index">Organizar categorías →</a></article>
+    <article class="panel"><span class="eyebrow">02 · COMPRENDE</span><h2>Mira el conjunto.</h2><p>Consulta reportes por mes y lleva una copia en CSV.</p><a asp-page="/Reportes">Explorar reportes →</a></article>
+    <article class="panel"><span class="eyebrow">03 · PLANIFICA</span><h2>Dale espacio a tus metas.</h2><p>Compara lo gastado con un presupuesto de referencia.</p><a asp-page="/Presupuesto">Probar presupuesto →</a></article>
+</div>

@@ -1,0 +1,8 @@
+@page "{id:int}"
+@model Bolsillo.Razor.Pages.Gastos.DetalleModel
+@{ ViewData["Title"] = "Detalle del gasto"; }
+<div class="page-heading"><span class="eyebrow">UN MOVIMIENTO, EN DETALLE</span><h1>Detalle del gasto</h1></div>
+<partial name="_Feedback" model="Model" />
+@if (Model.Gasto is { } g) {
+<article class="panel editor"><h2>@g.Descripcion</h2><dl class="details"><dt>Monto</dt><dd>@g.Monto.ToString("C2")</dd><dt>Fecha</dt><dd>@g.Fecha.ToString("dd/MM/yyyy")</dd><dt>Categoría</dt><dd>@Model.Categoria</dd></dl><div class="actions"><a class="button dark" asp-page="Editar" asp-route-id="@g.Id">Editar gasto</a><a class="button quiet" asp-page="Index">Volver a gastos</a></div></article>
+}

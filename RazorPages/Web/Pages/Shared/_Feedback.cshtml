@@ -1,0 +1,3 @@
+@model Bolsillo.Razor.Pages.ApiPageModel
+@if (!string.IsNullOrEmpty(Model.Success)) { <p class="notice success" role="status">@Model.Success</p> }
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="notice error" role="alert"><p>@Model.Error</p><a href="@Context.Request.Path@Context.Request.QueryString">Volver a intentar</a></div> }

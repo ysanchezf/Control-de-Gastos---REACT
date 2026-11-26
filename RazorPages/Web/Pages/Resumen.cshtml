@@ -1,0 +1,27 @@
+@page
+@model ResumenModel
+@{ ViewData["Title"] = "Resumen"; }
+<div class="page-heading"><span class="eyebrow">TU DINERO, EN CONTEXTO</span><h1>Resumen</h1><p>Lo que has registrado, en una sola mirada.</p></div>
+<partial name="_Feedback" model="Model" />
+@if (Model.Error is null) {
+<section class="summary-grid" aria-label="Resumen de gastos">
+    <article class="panel"><span>Total registrado</span><strong data-total>@Model.Total.ToString("C2")</strong><button type="button" class="text-button" data-visibility aria-pressed="false">Ocultar importe</button></article>
+    <article class="panel"><span>Movimientos</span><strong>@Model.Gastos.Count</strong><span>Gastos registrados</span></article>
+    <article class="panel"><span>Categorías</span><strong>@Model.Categorias.Count</strong><span>Tu organización empieza aquí</span></article>
+</section>
+<div class="two-column">
+<section class="panel"><div class="section-heading"><h2>Últimos movimientos</h2><a asp-page="/Gastos/Index">Ver todos →</a></div>
+@if (!Model.Gastos.Any()) { <p class="empty">Todavía no hay gastos. Crea una categoría y registra el primero.</p> }
+@foreach (var gasto in Model.Gastos.OrderByDescending(g => g.Fecha).ThenByDescending(g => g.Id).Take(5)) {
+<div class="list-row"><div><a asp-page="/Gastos/Detalle" asp-route-id="@gasto.Id">@gasto.Descripcion</a><small>@gasto.Fecha.ToString("dd/MM/yyyy")</small></div><strong>@gasto.Monto.ToString("C2")</strong></div>
+}
+</section>
+<section class="panel"><h2>Distribución por categoría</h2>
+@foreach (var categoria in Model.Categorias) {
+ var amount = Model.Gastos.Where(g => g.CategoriaId == categoria.Id).Sum(g => g.Monto);
+ var percentage = Model.Total > 0 ? amount / Model.Total * 100 : 0;
+ <div class="breakdown"><div><span>@categoria.Nombre</span><strong>@amount.ToString("C2")</strong></div><progress max="100" value="@percentage.ToString(System.Globalization.CultureInfo.InvariantCulture)">@percentage.ToString("N1")%</progress></div>
+}
+@if (!Model.Categorias.Any()) { <p class="empty">Tus categorías aparecerán aquí.</p> }
+</section></div>
+}

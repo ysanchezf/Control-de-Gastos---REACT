@@ -1,0 +1,10 @@
+@page "{id:int?}"
+@model Bolsillo.Razor.Pages.Categorias.EditarModel
+@{ ViewData["Title"] = Model.Id is null ? "Crear categoría" : "Editar categoría"; }
+<div class="page-heading"><span class="eyebrow">ORGANIZA TU ESPACIO</span><h1>@ViewData["Title"]</h1></div>
+<partial name="_Feedback" model="Model" />
+<section class="panel editor"><form method="post"><div asp-validation-summary="All" class="validation" role="alert"></div>
+<div class="form-grid"><label asp-for="Input.Nombre">Nombre<input asp-for="Input.Nombre" required minlength="2" maxlength="80" placeholder="Ej. Alimentación" /><span asp-validation-for="Input.Nombre"></span></label>
+<label asp-for="Input.Descripcion">Descripción<textarea asp-for="Input.Descripcion" required maxlength="250" placeholder="¿Qué gastos vas a agrupar aquí?"></textarea><span asp-validation-for="Input.Descripcion"></span></label></div>
+<div class="form-actions"><a class="button quiet" asp-page="Index">Cancelar</a><button class="button dark">@(Model.Id is null ? "Crear categoría" : "Guardar cambios") →</button></div>
+</form></section>
