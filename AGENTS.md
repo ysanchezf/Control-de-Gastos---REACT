@@ -5,7 +5,7 @@
 - Estructura autorizada: `Backend/` contiene la API ASP.NET Core y la SQLite existente; `React/` conserva la interfaz del tercer artefacto; `RazorPages/` contiene la evaluación final. No volver a mezclar las fuentes de los proyectos.
 - Ambas interfaces consumen la misma API y la misma base `Backend/App_Data/react-demo.db`. No crear una base independiente para Razor ni reemplazar datos locales con ejemplos.
 - Conservar las pantallas de React, su apariencia, el simulador y las rutas /, /gastos, /categorias y /bienvenida.
-- Mantener el modo de demostración sin login. No reactivar cuentas sin solicitud del usuario. Conservar validaciones y protección antifalsificación en la web y en la API.
+- Razor Pages utiliza registro, login y logout por solicitud del usuario. Proteger sus páginas y conservar el aislamiento por propietario, contraseñas con hash, cookies HttpOnly y protección antifalsificación. React conserva compatibilidad con el espacio local anterior y puede usar la sesión de la API en el mismo host.
 - No subir bases, auxiliares SQLite, claves, App_Data, local-backups, bin, obj, node_modules ni capturas de pruebas. El traslado local debe conservar toda App_Data y detenerse ante conflictos, sin sobrescribir.
 - No restaurar documentos eliminados por el usuario. AGENTS.md y README.md fueron confirmados y deben conservarse según la solicitud actual.
 - Evitar comentarios XML <summary> innecesarios. Explicar en español sencillo los cambios y los requisitos académicos.

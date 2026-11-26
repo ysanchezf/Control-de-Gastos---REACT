@@ -1,0 +1,15 @@
+@page
+@model Bolsillo.Razor.Pages.Cuenta.RegistroModel
+@{ ViewData["Title"] = "Crear cuenta"; }
+<div class="auth-heading"><span class="eyebrow">UN ESPACIO PARA TUS FINANZAS</span><h1>Crear cuenta</h1><p>Organiza tus gastos con tu propio usuario y contraseña.</p></div>
+<section class="panel auth-panel"><partial name="_Feedback" model="Model" />
+<form method="post"><div asp-validation-summary="All" class="validation" role="alert"></div>
+<div class="auth-fields"><div><label asp-for="Input.DisplayName">Nombre</label><input asp-for="Input.DisplayName" autocomplete="name" required minlength="2" maxlength="80" /></div>
+<div><label asp-for="Input.UserName">Usuario</label><input asp-for="Input.UserName" autocomplete="username" required minlength="3" maxlength="40" pattern="[a-zA-Z0-9._-]{3,40}" /><small>De 3 a 40 letras, números, puntos o guiones.</small></div>
+<div><label asp-for="Input.Password">Contraseña</label><input asp-for="Input.Password" type="password" autocomplete="new-password" required minlength="10" maxlength="128" /><small>Usa al menos 10 caracteres.</small></div>
+<div><label asp-for="Input.ConfirmPassword">Confirmar contraseña</label><input asp-for="Input.ConfirmPassword" type="password" autocomplete="new-password" required minlength="10" maxlength="128" /></div></div>
+@if (Model.FirstAccount) {
+<label class="checkbox-row"><input asp-for="Input.IncludeLegacyData" /><span>Vincular los gastos y categorías anteriores a esta primera cuenta.</span></label><p class="muted">No se borran registros. Al vincularlos, solo esta cuenta podrá consultarlos y modificarlos.</p>
+}
+<button class="button dark auth-submit">Crear mi cuenta →</button>
+</form><p class="auth-note">¿Ya tienes cuenta? <a asp-page="Login">Iniciar sesión</a></p></section>

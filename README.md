@@ -1,6 +1,6 @@
 # bolsillo · React y Razor Pages
 
-Dos interfaces académicas para el mismo control de gastos. **Una API ASP.NET Core .NET 10 y la SQLite existente** atienden a React y a Razor Pages. Se conserva el modo local de demostración sin login, con identidad técnica «Prueba».
+Dos interfaces académicas para el mismo control de gastos. **Una API ASP.NET Core .NET 10 y la SQLite existente** atienden a React y a Razor Pages. Razor Pages incluye registro, inicio y cierre de sesión con datos separados por usuario. El backend conserva compatibilidad con el espacio local anterior de React.
 
 ## Organización
 
@@ -44,7 +44,7 @@ React conserva las pantallas de Resumen, Gastos, Categorías e Inicio, además d
 
 `Backend/appsettings.json` mantiene `Data Source=App_Data/react-demo.db`, ahora relativa al backend. Si ya utilizas otra ruta, establece `ConnectionStrings__DemoConnection` con su ruta absoluta antes de iniciar el backend; una conexión personalizada desactiva el traslado automático. No renombres una base de otro proyecto sin comprobar su esquema. Las bases de cuentas de Blazor no se seleccionan automáticamente.
 
-La base personal de tu PC no está en GitHub y no puede copiarse desde la nube. En una instalación nueva sin base local, EF Core crea una base vacía con el mismo esquema; si ya tienes datos, verifica el respaldo y la ruta antes del primer arranque. **Razor y React muestran y modifican los mismos registros.**
+La base personal de tu PC no está en GitHub y no puede copiarse desde la nube. En una instalación nueva sin base local, EF Core crea una base vacía con el mismo esquema; si ya tienes datos, verifica el respaldo y la ruta antes del primer arranque. **Razor y React utilizan la misma base; los registros visibles dependen de la cuenta autenticada.**
 
 ## Requisitos
 
@@ -68,7 +68,20 @@ Terminal 2, interfaz Razor:
 dotnet run --project RazorPages/Web/ControlGastos.Razor.Web.csproj --launch-profile http
 ```
 
-Abre **http://localhost:5081**. La API está en **http://localhost:5080/swagger**. No es necesario iniciar React para utilizar Razor.
+Abre **http://localhost:5081** y selecciona **Crear cuenta**. Después inicia sesión con tu usuario y contraseña. No hay contraseñas predeterminadas ni cuentas públicas precargadas. La API está en **http://localhost:5080/swagger**. No es necesario iniciar React para utilizar Razor.
+
+### Cuentas y datos anteriores
+
+- La landing es pública. Resumen, Gastos, Categorías, Reportes y Presupuesto requieren sesión; si intentas entrar directamente, se abre el login y después se vuelve a la ruta solicitada.
+- La primera cuenta puede marcar **Vincular los gastos y categorías anteriores a esta primera cuenta**. Esta operación cambia el propietario de los registros del espacio local anterior en una transacción; no borra datos ni crea otra base. Márcala solo si esos registros deben pertenecer a esa cuenta.
+- Si no los vinculas, los datos anteriores permanecen en el espacio local de React. Las cuentas nuevas comienzan con sus propias categorías y gastos.
+- Las contraseñas se guardan con `PasswordHasher<AppUser>` de ASP.NET Core Identity, nunca como texto plano. Se reutiliza la tabla `Users` existente; no se crea otra base ni se requiere una migración nueva del esquema.
+- Cinco contraseñas incorrectas bloquean la cuenta durante 15 minutos. Los endpoints de registro y login tienen un límite adicional de 20 solicitudes por minuto y dirección IP; detrás del sitio Razor los visitantes comparten la IP del servidor.
+- Las sesiones duran como máximo dos horas y utilizan cookies HttpOnly. Cerrar sesión requiere un POST con antiforgery. Las cuentas inactivas son rechazadas también en la API.
+- Para abrir React con la misma cuenta, utiliza el **mismo host** del navegador (por ejemplo `localhost` para ambos puertos). Las cookies no se comparten entre `localhost` y `127.0.0.1`. Sin sesión, React conserva el espacio local anterior; no puede acceder a los registros de cuentas privadas.
+- Las claves de `Backend/App_Data/keys` y `RazorPages/Web/App_Data/keys` deben conservarse. Son distintas: el sitio guarda un ticket de API dentro de su propia cookie protegida y lo reenvía por HTTP, sin compartir un contenedor de cookies entre usuarios.
+
+Este es un proyecto académico local: ambos procesos continúan configurados para Development. El login usa cookies y el componente de hash de Identity; no incorpora el sistema completo de Identity UI ni recuperación de contraseña por correo.
 
 En Visual Studio abre `ControlGastos.sln`. En Propiedades de la solución → Proyectos de inicio, selecciona **Varios proyectos de inicio** y configura `ControlGastos.Api` y `ControlGastos.Razor.Web` como Iniciar, con sus perfiles `http`. Mantén ambos ejecutándose.
 
@@ -123,10 +136,14 @@ Razor lee `Api:BaseUrl` de `RazorPages/Web/appsettings.json` mediante opciones e
 
 Dos extras sobre lo solicitado: **reportes mensuales con exportación CSV** y **simulador de presupuesto mensual**, con cálculos del lado del servidor. El simulador no persiste un límite ni modifica gastos. El CSV protege descripciones que podrían interpretarse como fórmulas en una hoja de cálculo.
 
-Los PDF de clase se usaron como material de referencia para PageModel, Tag Helpers, formularios, servicios e inyección de dependencias. No se activó login ni se configuró IIS: la evaluación no los exige y esta versión compartida permanece solo para Development.
+Los PDF de clase se usaron como material de referencia para PageModel, Tag Helpers, formularios, servicios e inyección de dependencias. El usuario solicitó añadir login: se implementaron cuentas y páginas protegidas basándose en esos conceptos. No se configuró IIS; los procesos se mantienen en Development.
 
 ## API y flujo de datos
 
+- `GET /cuenta/estado`: indica si se trata de la primera cuenta.
+- `POST /cuenta/registro`, `POST /cuenta/login` y `POST /cuenta/logout`.
+- `GET /cuenta/actual`: devuelve la identidad autenticada; rechaza la identidad técnica anterior.
+- `GET /cuenta/antiforgery`: token para las escrituras.
 - `GET /api/Gastos`, `/api/Gastos/{id}` y `/api/Gastos/total`.
 - `POST /api/Gastos`, `PUT /api/Gastos/{id}`, `DELETE /api/Gastos/{id}`.
 - `GET /api/Categorias`, `/api/Categorias/{id}`.
@@ -154,6 +171,6 @@ Pruebas opcionales con Python, Playwright y Chromium: [RazorPages/tests/README.m
 2. Crear categoría y gasto, consultar detalle y editar el monto.
 3. Explicar `@Model`, `[BindProperty]`, `OnGetAsync`, `OnPostAsync` y Tag Helpers.
 4. Señalar el servicio HTTP y su registro en Program.cs; mostrar la URL en appsettings.json.
-5. Mostrar los mismos registros en React y Razor, porque comparten backend y SQLite.
+5. Mostrar el registro y el login, y explicar que las consultas se filtran por el usuario autenticado. Si abres React con el mismo host y sesión, verás los mismos registros.
 6. Demostrar reporte CSV, presupuesto, visibilidad y confirmación JavaScript.
 7. Mostrar Swagger y explicar validaciones y persistencia.

@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Claims;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Bolsillo.Razor.Models;
@@ -10,12 +11,20 @@ public sealed class ApiOptions
     public string BaseUrl { get; set; } = "";
 }
 public sealed record TotalResponse(decimal TotalGastos);
+public sealed record AccountState(bool FirstAccount);
+public sealed record AccountUser(int Id, string Name);
+public sealed record AccountSession(AccountUser User, string Ticket);
 public sealed class ApiException(string message, HttpStatusCode? status = null) : Exception(message)
 {
     public HttpStatusCode? Status { get; } = status;
 }
 public interface IControlGastosApi
 {
+    Task<AccountState> AccountStateAsync();
+    Task RegisterAsync(RegisterInput input);
+    Task<AccountSession> LoginAsync(LoginInput input);
+    Task<AccountUser> CurrentAsync(string ticket);
+    Task LogoutAsync();
     Task<List<Gasto>> GastosAsync();
     Task<Gasto> GastoAsync(int id);
     Task<List<Categoria>> CategoriasAsync();
@@ -26,8 +35,26 @@ public interface IControlGastosApi
     Task GuardarCategoriaAsync(CategoryInput input, int? id = null);
     Task EliminarCategoriaAsync(int id);
 }
-public sealed class ControlGastosApi(HttpClient client, ILogger<ControlGastosApi> logger) : IControlGastosApi
+public sealed class ControlGastosApi(HttpClient client, ILogger<ControlGastosApi> logger, IHttpContextAccessor context) : IControlGastosApi
 {
+    public Task<AccountState> AccountStateAsync() => ReadAsync<AccountState>("cuenta/estado", anonymous: true);
+    public async Task RegisterAsync(RegisterInput input) {
+        using var response = await WriteResponseAsync(HttpMethod.Post, "cuenta/registro", input, anonymous: true);
+    }
+    public async Task<AccountSession> LoginAsync(LoginInput input)
+    {
+        using var response = await WriteResponseAsync(HttpMethod.Post, "cuenta/login", input, anonymous: true);
+        var user = await response.Content.ReadFromJsonAsync<AccountUser>() ?? throw new ApiException("No se pudo leer la sesión.");
+        var cookies = new CookieContainer();
+        if (response.Headers.TryGetValues("Set-Cookie", out var values))
+            foreach (var value in values) cookies.SetCookies(client.BaseAddress!, value);
+        var ticket = cookies.GetCookies(client.BaseAddress!)[WebSession.ApiCookie]?.Value;
+        if (string.IsNullOrEmpty(ticket)) throw new ApiException("No se pudo iniciar la sesión. Intenta nuevamente.");
+        return new AccountSession(user, ticket);
+    }
+    public Task<AccountUser> CurrentAsync(string ticket) => ReadAsync<AccountUser>("cuenta/actual", ticket);
+    public Task LogoutAsync() => WriteAsync(HttpMethod.Post, "cuenta/logout", null);
+
     public Task<List<Gasto>> GastosAsync() => ReadAsync<List<Gasto>>("api/Gastos");
     public Task<Gasto> GastoAsync(int id) => ReadAsync<Gasto>($"api/Gastos/{id}");
     public Task<List<Categoria>> CategoriasAsync() => ReadAsync<List<Categoria>>("api/Categorias");
@@ -38,9 +65,9 @@ public sealed class ControlGastosApi(HttpClient client, ILogger<ControlGastosApi
     public Task GuardarCategoriaAsync(CategoryInput input, int? id = null) => WriteAsync(id is null ? HttpMethod.Post : HttpMethod.Put, "api/Categorias" + (id is null ? "" : $"/{id}"), input);
     public Task EliminarCategoriaAsync(int id) => WriteAsync(HttpMethod.Delete, $"api/Categorias/{id}", null);
 
-    private async Task<T> ReadAsync<T>(string path)
+    private async Task<T> ReadAsync<T>(string path, string? ticket = null, bool anonymous = false)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, path);
+        using var request = Request(HttpMethod.Get, path, ticket, anonymous);
         using var response = await SendAsync(request);
         await EnsureAsync(response);
         try { return await response.Content.ReadFromJsonAsync<T>() ?? throw new ApiException("La API devolvió una respuesta vacía."); }
@@ -48,13 +75,19 @@ public sealed class ControlGastosApi(HttpClient client, ILogger<ControlGastosApi
     }
     private async Task WriteAsync(HttpMethod method, string path, object? input)
     {
-        using var tokenRequest = new HttpRequestMessage(HttpMethod.Get, "cuenta/antiforgery");
+        using var response = await WriteResponseAsync(method, path, input);
+    }
+    private async Task<HttpResponseMessage> WriteResponseAsync(HttpMethod method, string path, object? input, bool anonymous = false)
+    {
+        using var tokenRequest = Request(HttpMethod.Get, "cuenta/antiforgery", anonymous: anonymous);
         using var tokenResponse = await SendAsync(tokenRequest);
         await EnsureAsync(tokenResponse);
         var token = await tokenResponse.Content.ReadFromJsonAsync<TokenResponse>();
         if (string.IsNullOrWhiteSpace(token?.Token)) throw new ApiException("No se pudo obtener la protección de la API. Intenta nuevamente.");
         // Las cookies pertenecen solo a esta operación; no se comparten entre visitantes.
         var cookies = new CookieContainer();
+        var session = anonymous ? null : context.HttpContext?.User.FindFirstValue(WebSession.TicketClaim);
+        if (!string.IsNullOrEmpty(session)) cookies.SetCookies(client.BaseAddress!, WebSession.ApiCookie + "=" + session);
         var uri = new Uri(client.BaseAddress!, "cuenta/antiforgery");
         if (tokenResponse.Headers.TryGetValues("Set-Cookie", out var values))
             foreach (var value in values) cookies.SetCookies(uri, value);
@@ -62,8 +95,16 @@ public sealed class ControlGastosApi(HttpClient client, ILogger<ControlGastosApi
         request.Headers.Add("X-CSRF-TOKEN", token.Token);
         request.Headers.Add("Cookie", cookies.GetCookieHeader(new Uri(client.BaseAddress!, path)));
         if (input is not null) request.Content = JsonContent.Create(input);
-        using var response = await SendAsync(request);
-        await EnsureAsync(response);
+        var response = await SendAsync(request);
+        try { await EnsureAsync(response); return response; }
+        catch { response.Dispose(); throw; }
+    }
+    private HttpRequestMessage Request(HttpMethod method, string path, string? ticket = null, bool anonymous = false)
+    {
+        var request = new HttpRequestMessage(method, path);
+        var session = ticket ?? (anonymous ? null : context.HttpContext?.User.FindFirstValue(WebSession.TicketClaim));
+        if (!string.IsNullOrEmpty(session)) request.Headers.Add("Cookie", WebSession.ApiCookie + "=" + session);
+        return request;
     }
     private async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
     {
@@ -78,6 +119,8 @@ public sealed class ControlGastosApi(HttpClient client, ILogger<ControlGastosApi
     {
         if (response.IsSuccessStatusCode) return;
         string message = response.StatusCode switch {
+            HttpStatusCode.Unauthorized => "Tu sesión terminó. Vuelve a iniciar sesión.",
+            HttpStatusCode.TooManyRequests => "Demasiados intentos. Espera un minuto antes de volver a intentar.",
             HttpStatusCode.NotFound => "El registro ya no existe. Actualiza la página.",
             HttpStatusCode.BadRequest => "Revisa los datos del formulario y vuelve a intentar.",
             _ => "No se pudo completar la operación. Intenta nuevamente."

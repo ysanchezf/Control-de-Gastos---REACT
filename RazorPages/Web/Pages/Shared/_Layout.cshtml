@@ -17,13 +17,18 @@
         <a class="brand" asp-page="/Index"><img src="~/images/wallet.svg" alt="" /> @Configuration["AppSettings:NombreAplicacion"]</a>
         <span class="eyebrow">MIS CUENTAS</span>
         <nav aria-label="Navegación principal">
+        @if (User.Identity?.IsAuthenticated == true) {
         @foreach (var link in new[] { ("/Index", "Inicio"), ("/Resumen", "Resumen"), ("/Gastos/Index", "Gastos"), ("/Categorias/Index", "Categorías"), ("/Reportes", "Reportes"), ("/Presupuesto", "Presupuesto") })
         {
             var active = string.Equals(ViewContext.RouteData.Values["page"]?.ToString(), link.Item1, StringComparison.OrdinalIgnoreCase);
             <a asp-page="@link.Item1" class="@(active ? "active" : "")" aria-current="@(active ? "page" : null)">@link.Item2</a>
         }
+        }
+        else { <a asp-page="/Index">Inicio</a><a asp-page="/Cuenta/Login">Iniciar sesión</a><a asp-page="/Cuenta/Registro">Crear cuenta</a> }
         </nav>
-        <div class="demo-badge"><span>MODO PRUEBA</span><p>Tu espacio de demostración.</p><strong>Prueba · Razor Pages</strong></div>
+        @if (User.Identity?.IsAuthenticated == true) {
+            <div class="account-badge"><span>MI CUENTA</span><strong>@User.Identity.Name</strong><form method="post" asp-page="/Cuenta/Logout"><button class="button quiet">Cerrar sesión</button></form></div>
+        }
     </aside>
     <div class="workspace">
         <header class="topbar"><span>Control de gastos</span><time datetime="@DateTime.Today.ToString("yyyy-MM-dd")">@DateTime.Today.ToString("dddd, d 'de' MMMM")</time></header>

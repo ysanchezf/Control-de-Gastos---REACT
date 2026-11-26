@@ -1,0 +1,13 @@
+@page
+@model Bolsillo.Razor.Pages.Cuenta.LoginModel
+@{ ViewData["Title"] = "Iniciar sesión"; }
+<div class="auth-heading"><span class="eyebrow">BIENVENIDO A BOLSILLO</span><h1>Iniciar sesión</h1><p>Tu organización empieza con un espacio para ti.</p></div>
+<section class="panel auth-panel">
+<partial name="_Feedback" model="Model" />
+<form method="post"><input type="hidden" asp-for="ReturnUrl" />
+<div asp-validation-summary="All" class="validation" role="alert"></div>
+<div class="auth-fields"><div><label asp-for="Input.UserName">Usuario</label><input asp-for="Input.UserName" autocomplete="username" required maxlength="40" /></div>
+<div><label asp-for="Input.Password">Contraseña</label><input asp-for="Input.Password" type="password" autocomplete="current-password" required maxlength="128" /></div></div>
+<button class="button dark auth-submit">Entrar →</button>
+</form><p class="auth-note">¿Es tu primera vez? <a asp-page="Registro">Crear una cuenta</a></p>
+</section>
